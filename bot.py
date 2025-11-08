@@ -43,14 +43,19 @@ async def on_message_delete(msg):
 	
 	archive_channel = discord.utils.get(msg.guild.text_channels, name=ARCHIVE_CHANNEL_NAME)
 
-	embed = discord.Embed(title="Task Completed", description=msg.content or "*no text content*", color=discord.Color.green(), timestamp=msg.created_at)
-	embed.set_author(name=f"{msg.author.name}", icon_url=msg.author.display_avatar.url)
-
-	if msg.attachments: 
-		attachment_urls = "\n".join([att.url for att in msg.attachments])
-		embed.add_field(name="Attachments", value=attachment_urls, inline=False)
-
-	await archive_channel.send(embed=embed)
+	# msg header
+	header = f"**Task Completed** by {msg.author.mention} at <t:{int(msg.created_at.timestamp())}:f>\n"
+	separator = "─" * 13
+	
+	# task
+	await archive_channel.send(
+		f"{header}{separator}\n{msg.content}\n"
+	)
+	
+	# attachment separate
+	if msg.attachments:
+		for att in msg.attachments:
+			await archive_channel.send(att.url)
 
 @bot.command()
 @commands.has_permissions(administrator=True)
