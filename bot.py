@@ -2,15 +2,13 @@ import discord
 from discord.ext import commands
 import os
 from dotenv import load_dotenv
+from datetime import datetime, timezone
 
 load_dotenv()
-
 intents = discord.Intents.default()
 intents.message_content = True
 intents.messages = True
-
 bot = commands.Bot(command_prefix='!', intents=intents)
-
 MONITORED_CHANNEL_NAME = "todos"  
 ARCHIVE_CHANNEL_NAME = "todo-archive" 
 
@@ -24,11 +22,9 @@ async def on_ready():
 async def setup_channels(guild):
 	monitor_channel = discord.utils.get(guild.text_channels, name=MONITORED_CHANNEL_NAME)
 	archive_channel = discord.utils.get(guild.text_channels, name=ARCHIVE_CHANNEL_NAME)
-
 	# create archive channel if doesn't exist
 	if archive_channel is None:
 		archive_channel = await guild.create_text_channel(ARCHIVE_CHANNEL_NAME, topic="archive msgs are here", reason="AUTO MADE")
-
 	# create monitor channel if doesn't exist
 	if monitor_channel is None:
 		monitor_channel = await guild.create_text_channel(MONITORED_CHANNEL_NAME, topic="monitoring channel", reason="AUTO MADE")
@@ -42,9 +38,11 @@ async def on_message_delete(msg):
 		return
 	
 	archive_channel = discord.utils.get(msg.guild.text_channels, name=ARCHIVE_CHANNEL_NAME)
-
+	# Get current time when task is completed
+	completion_time = datetime.now(timezone.utc)
+	
 	# msg header
-	header = f"**Task Completed** by {msg.author.mention} at <t:{int(msg.created_at.timestamp())}:f>\n"
+	header = f"**Task Completed** by {msg.author.mention} at <t:{int(completion_time.timestamp())}:f>\n"
 	separator = "─" * 13
 	
 	# task
